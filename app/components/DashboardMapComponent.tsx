@@ -54,31 +54,27 @@ export default function DashboardMap() {
     const fetchTourists = async () => {
       try {
         setLoading(true);
-        // Simulate API call with mock data for now
-        const mockTourists = Array.from({ length: 15 }, (_, index) => ({
-          _id: `tourist_${index}`,
-          digitalId: `TID-${Math.random().toString(36).substr(2, 6)}`,
-          lastLocation: {
-            lat: 26.9124 + (Math.random() - 0.5) * 0.3,
-            lng: 75.7873 + (Math.random() - 0.5) * 0.3,
-          },
-          safetyStatus:
-            Math.random() > 0.85
-              ? "danger"
-              : Math.random() > 0.7
-              ? "alert"
-              : "normal",
-          kyc: {
-            name: `Tourist ${index + 1}`,
-            nationality: ["USA", "UK", "Germany", "France", "Japan"][
-              Math.floor(Math.random() * 5)
-            ],
-          },
-        })) as Tourist[];
+        // Fetch real data from the API
+        const response = await fetch('http://localhost:4000/api/dashboard/tourists');
+        if (!response.ok) {
+          throw new Error('Failed to fetch tourists');
+        }
 
-        setTourists(mockTourists);
+        const touristsData = await response.json();
+
+        // Filter out tourists without location data for the map
+        const touristsWithLocation = touristsData.filter((tourist: any) =>
+          tourist.lastLocation &&
+          tourist.lastLocation.lat &&
+          tourist.lastLocation.lng &&
+          tourist.isActive
+        );
+
+        setTourists(touristsWithLocation);
       } catch (error) {
         console.error("Failed to fetch tourists", error);
+        // Fallback to empty array on error
+        setTourists([]);
       } finally {
         setLoading(false);
       }
@@ -205,6 +201,19 @@ export default function DashboardMap() {
                             {tourist.lastLocation.lng.toFixed(4)}
                           </span>
                         </p>
+                        {/* Google Maps Link for tourists in danger */}
+                        {tourist.safetyStatus === "danger" && (
+                          <div className="mt-2 pt-2 border-t">
+                            <a
+                              href={`https://www.google.com/maps?q=${tourist.lastLocation.lat},${tourist.lastLocation.lng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 text-xs underline font-medium"
+                            >
+                              🚨 View Emergency Location on Google Maps
+                            </a>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </Popup>
