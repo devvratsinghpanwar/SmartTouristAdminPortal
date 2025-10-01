@@ -1,26 +1,175 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: rgb(255, 255, 255); /* HSL(0, 0%, 100%) */
+  --color-foreground: rgb(34, 34, 34); /* HSL(217, 20.2%, 15.1%) */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: rgb(183, 222, 241); /* HSL(217.2, 91.2%, 59.8%) */
+  --color-sidebar-border: rgb(182, 199, 215); /* HSL(220, 13%, 91%) */
+  --color-sidebar-accent-foreground: rgb(39, 43, 47); /* HSL(240, 5.9%, 10%) */
+  --color-sidebar-accent: rgb(214, 218, 223); /* HSL(240, 4.8%, 95.9%) */
+  --color-sidebar-primary-foreground: rgb(255, 255, 255); /* HSL(0, 0%, 98%) */
+  --color-sidebar-primary: rgb(38, 41, 43); /* HSL(240, 5.9%, 10%) */
+  --color-sidebar-foreground: rgb(24, 25, 27); /* HSL(240, 5.3%, 26.1%) */
+  --color-sidebar: rgb(255, 255, 255); /* HSL(240, 5.9%, 98%) */
+  --color-chart-5: rgb(109, 139, 204); /* HSL(217, 91%, 60%) */
+  --color-chart-4: rgb(85, 141, 204); /* HSL(217, 91%, 70%) */
+  --color-chart-3: rgb(121, 158, 174); /* HSL(217, 91%, 50%) */
+  --color-chart-2: rgb(204, 204, 204); /* HSL(0, 0%, 80%) */
+  --color-chart-1: rgb(177, 188, 195); /* HSL(210, 40%, 96.1%) */
+  --color-ring: rgb(98, 142, 209); /* HSL(217, 91%, 60%) */
+  --color-input: rgb(219, 227, 237); /* HSL(214.3, 31.8%, 91.4%) */
+  --color-border: rgb(197, 204, 212); /* HSL(214.3, 31.8%, 91.4%) */
+  --color-destructive: rgb(255, 83, 51); /* HSL(0, 84.2%, 60.2%) */
+  --color-accent-foreground: rgb(255, 255, 255); /* HSL(0, 0%, 98%) */
+  --color-accent: #65ca63; /* HSL(142, 76%, 36%) */
+  --color-muted-foreground: rgb(148, 156, 169); /* HSL(215.4, 16.3%, 46.9%) */
+  --color-muted: rgb(205, 216, 226); /* HSL(210, 40%, 96.1%) */
+  --color-secondary-foreground: rgb(34, 34, 34); /* HSL(217, 20.2%, 15.1%) */
+  --color-secondary: rgb(164, 170, 178); /* HSL(215.4, 16.3%, 46.9%) */
+  --color-primary-foreground: rgb(255, 255, 255); /* HSL(0, 0%, 98%) */
+  --color-primary: rgb(67, 135, 218); /* HSL(217, 91%, 60%) */
+  --color-primary-glow: rgb(41, 93, 157);
+  --color-popover-foreground: rgb(34, 34, 34); /* HSL(217, 20.2%, 15.1%) */
+  --color-popover: rgb(255, 255, 255); /* HSL(0, 0%, 100%) */
+  --color-card-foreground: rgb(34, 34, 34); /* HSL(217, 20.2%, 15.1%) */
+  --color-card: rgb(255, 255, 255); /* HSL(0, 0%, 100%) */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-warning: rgb(255, 204, 0); /* HSL(43, 96%, 56%) */
+  --color-warning-foreground: rgb(35, 43, 51); /* HSL(222.2, 47%, 11%) */
+  --shadow-elegant: 0 10px 30px -10px hsl(217 91% 60% / 0.3);
+  --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+
+
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: rgb(255, 255, 255); /* HSL(0, 0%, 100%) */
+  --foreground: rgb(34, 34, 34); /* HSL(217, 20.2%, 15.1%) */
+
+  --card: rgb(255, 255, 255); /* HSL(0, 0%, 100%) */
+  --card-foreground: rgb(34, 34, 34); /* HSL(217, 20.2%, 15.1%) */
+
+  --popover: rgb(255, 255, 255); /* HSL(0, 0%, 100%) */
+  --popover-foreground: rgb(34, 34, 34); /* HSL(217, 20.2%, 15.1%) */
+
+  --primary: rgb(35, 103, 187); /* HSL(217, 91%, 60%) */
+  --primary-foreground: rgb(255, 255, 255); /* HSL(0, 0%, 98%) */
+  --primary-glow: rgb(41, 93, 157); /* HSL(217, 91%, 70%) */
+
+  --secondary: rgb(185, 198, 208); /* HSL(210, 40%, 96.1%) */
+  --secondary-foreground: rgb(34, 34, 34); /* HSL(217, 20.2%, 15.1%) */
+
+  --muted: rgb(185, 198, 208); /* HSL(210, 40%, 96.1%) */
+  --muted-foreground: rgb(148, 159, 169); /* HSL(215.4, 16.3%, 46.9%) */
+
+  --accent: rgb(104, 204, 103); /* HSL(142, 76%, 36%) */
+  --accent-foreground: rgb(255, 255, 255); /* HSL(0, 0%, 98%) */
+
+  --destructive: rgb(255, 83, 51); /* HSL(0, 62.8%, 30.6%) */
+  --destructive-foreground: rgb(255, 255, 255); /* HSL(0, 0%, 98%) */
+
+  --warning: rgb(255, 204, 0); /* HSL(43, 96%, 56%) */
+  --warning-foreground: rgb(34, 34, 34); /* HSL(217, 20.2%, 15.1%) */
+
+  --border: rgb(182, 199, 215); /* HSL(214.3, 31.8%, 91.4%) */
+  --input: rgb(182, 199, 215); /* HSL(214.3, 31.8%, 91.4%) */
+  --ring: rgb(98, 149, 211); /* HSL(217, 91%, 60%) */
+
+  --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
+  --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 40% 98%));
+  --gradient-feature: linear-gradient(135deg, hsl(217 91% 60% / 0.05), hsl(217 91% 70% / 0.1));
+
+    /* Shadows */
+  --shadow-elegant: 0 10px 30px -10px hsl(217 91% 60% / 0.3);
+  --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+
+  --sidebar-background: rgb(38, 41, 43); /* HSL(240, 5.9%, 10%) */
+  --sidebar-foreground: rgb(214, 218, 223); /* HSL(240, 4.8%, 95.9%) */
+  --sidebar-primary: rgb(180, 123, 204); /* HSL(224.3, 76.3%, 48%) */
+  --sidebar-primary-foreground: rgb(255, 255, 255); /* HSL(0, 0%, 100%) */
+  --sidebar-accent: rgb(39, 43, 47); /* HSL(240, 3.7%, 15.9%) */
+  --sidebar-accent-foreground: rgb(214, 218, 223); /* HSL(240, 4.8%, 95.9%) */
+  --sidebar-border: rgb(39, 43, 47); /* HSL(240, 3.7%, 15.9%) */
+  --sidebar-ring: rgb(98, 149, 211); /* HSL(217.2, 91.2%, 59.8%) */
+}
+
+.dark {
+  --background: rgb(35, 43, 51); /* HSL(222.2, 47%, 11%) */
+  --foreground: rgb(210, 190, 255); /* HSL(210, 40%, 98%) */
+
+  --card: rgb(35, 43, 51); /* HSL(222.2, 47%, 11%) */
+  --card-foreground: rgb(210, 190, 255); /* HSL(210, 40%, 98%) */
+
+  --popover: rgb(35, 43, 51); /* HSL(222.2, 47%, 11%) */
+  --popover-foreground: rgb(210, 190, 255); /* HSL(210, 40%, 98%) */
+
+  --primary: rgb(47, 103, 171); /* HSL(217, 91%, 60%) */
+  --primary-foreground: rgb(35, 43, 51); /* HSL(222.2, 47%, 11%) */
+  --primary-glow: rgb(98, 149, 211); /* HSL(217, 91%, 70%) */
+
+  --secondary: rgb(43, 45, 49); /* HSL(217.2, 32.6%, 17.5%) */
+  --secondary-foreground: rgb(210, 190, 255); /* HSL(210, 40%, 98%) */
+
+  --muted: rgb(43, 45, 49); /* HSL(217.2, 32.6%, 17.5%) */
+  --muted-foreground: rgb(150, 157, 165); /* HSL(215, 20.2%, 65.1%) */
+
+  --accent: rgb(104, 204, 103); /* HSL(142, 76%, 36%) */
+  --accent-foreground: rgb(210, 190, 255); /* HSL(210, 40%, 98%) */
+
+  --destructive: rgb(255, 126, 77); /* HSL(0, 62.8%, 30.6%) */
+  --destructive-foreground: rgb(210, 190, 255); /* HSL(210, 40%, 98%) */
+
+  --warning: rgb(255, 204, 0); /* HSL(43, 96%, 56%) */
+  --warning-foreground: rgb(35, 43, 51); /* HSL(222.2, 47%, 11%) */
+
+  --border: rgb(43, 45, 49); /* HSL(217.2, 32.6%, 17.5%) */
+  --input: rgb(43, 45, 49); /* HSL(217.2, 32.6%, 17.5%) */
+  --ring: rgb(98, 149, 211); /* HSL(217, 91%, 60%) */
+
+  /* Gradients */
+  --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
+  --gradient-card: linear-gradient(180deg, hsl(222.2 47% 11%), hsl(217.2 32.6% 17.5%));
+  --gradient-feature: linear-gradient(135deg, hsl(217 91% 60% / 0.1), hsl(217 91% 70% / 0.2)); 
+
+  --sidebar-background: rgb(38, 41, 43); /* HSL(240, 5.9%, 10%) */
+  --sidebar-foreground: rgb(214, 218, 223); /* HSL(240, 4.8%, 95.9%) */
+  --sidebar-primary: rgb(180, 123, 204); /* HSL(224.3, 76.3%, 48%) */
+  --sidebar-primary-foreground: rgb(255, 255, 255); /* HSL(0, 0%, 100%) */
+  --sidebar-accent: rgb(39, 43, 47); /* HSL(240, 3.7%, 15.9%) */
+  --sidebar-accent-foreground: rgb(214, 218, 223); /* HSL(240, 4.8%, 95.9%) */
+  --sidebar-border: rgb(39, 43, 47); /* HSL(240, 3.7%, 15.9%) */
+  --sidebar-ring: rgb(98, 149, 211); /* HSL(217.2, 91.2%, 59.8%) */
+}
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .bg-gradient-hero {
+    background-image: var(--gradient-hero);
+  }
+  .bg-gradient-card {
+    background-image: var(--gradient-card);
+  }
+  .bg-gradient-feature {
+    background-image: var(--gradient-feature);
+  }
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
 }
