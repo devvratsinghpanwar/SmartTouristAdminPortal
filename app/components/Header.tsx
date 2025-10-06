@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { ShieldCheck, User, LogOut, UserPlus } from "lucide-react";
+import { ShieldCheck, User, LogOut, UserPlus, Bell } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
 
@@ -45,6 +45,17 @@ const Header = () => {
                   >
                     <UserPlus className="h-4 w-4" />
                     <span>Create Agent</span>
+                  </Link>
+                )}
+
+                {/* Send Notification Button - For users with notification permissions */}
+                {user.permissions.canSendNotifications && (
+                  <Link
+                    href="/send-notification"
+                    className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                  >
+                    <Bell className="h-4 w-4" />
+                    <span>Send Notification</span>
                   </Link>
                 )}
 

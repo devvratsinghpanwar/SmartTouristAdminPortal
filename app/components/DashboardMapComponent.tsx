@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polygon } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 import L from "leaflet";
@@ -46,43 +46,64 @@ interface Tourist {
   };
 }
 
+interface GeoFence {
+  _id: string;
+  name: string;
+  type: "safe_zone" | "restricted_zone" | "alert_zone" | "emergency_zone" | "danger_zone" | "restricted_area" | "tourist_zone";
+  riskLevel?: "low" | "medium" | "high" | "critical";
+  geometry: {
+    type: "Polygon" | "Circle";
+    coordinates: number[][] | number[];
+    radius?: number;
+  };
+  isActive: boolean;
+}
+
 export default function DashboardMap() {
   const [tourists, setTourists] = useState<Tourist[]>([]);
+  const [geoFences, setGeoFences] = useState<GeoFence[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTourists = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        // Fetch real data from the API
-        const response = await fetch('http://localhost:4000/api/dashboard/tourists');
-        if (!response.ok) {
-          throw new Error('Failed to fetch tourists');
+
+        // Fetch tourists data
+        const touristsResponse = await fetch('http://localhost:4000/api/dashboard/tourists');
+        if (touristsResponse.ok) {
+          const touristsData = await touristsResponse.json();
+          // Filter out tourists without location data for the map
+          const touristsWithLocation = touristsData.filter((tourist: any) =>
+            tourist.lastLocation &&
+            tourist.lastLocation.lat &&
+            tourist.lastLocation.lng &&
+            tourist.isActive
+          );
+          setTourists(touristsWithLocation);
         }
 
-        const touristsData = await response.json();
-
-        // Filter out tourists without location data for the map
-        const touristsWithLocation = touristsData.filter((tourist: any) =>
-          tourist.lastLocation &&
-          tourist.lastLocation.lat &&
-          tourist.lastLocation.lng &&
-          tourist.isActive
-        );
-
-        setTourists(touristsWithLocation);
+        // Fetch geo-fences data
+        const geoFencesResponse = await fetch('http://localhost:4000/api/geofences', {
+          credentials: 'include'
+        });
+        if (geoFencesResponse.ok) {
+          const geoFencesResult = await geoFencesResponse.json();
+          const geoFencesData = geoFencesResult.success ? geoFencesResult.data.geoFences : [];
+          setGeoFences(geoFencesData.filter((gf: GeoFence) => gf.isActive));
+        }
       } catch (error) {
-        console.error("Failed to fetch tourists", error);
-        // Fallback to empty array on error
+        console.error("Failed to fetch map data", error);
         setTourists([]);
+        setGeoFences([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTourists();
+    fetchData();
     // Fetch every 30 seconds to simulate real-time updates
-    const interval = setInterval(fetchTourists, 30000);
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -125,24 +146,80 @@ export default function DashboardMap() {
     }
   };
 
+  const getGeoFenceColor = (geoFence: GeoFence) => {
+    // Use risk level if available, otherwise fall back to type-based colors
+    if (geoFence.riskLevel) {
+      switch (geoFence.riskLevel) {
+        case "low":
+          return { color: "#22c55e", fillColor: "#22c55e", fillOpacity: 0.2 }; // Green
+        case "medium":
+          return { color: "#fbbf24", fillColor: "#fbbf24", fillOpacity: 0.2 }; // Yellow/Orange
+        case "high":
+          return { color: "#ef4444", fillColor: "#ef4444", fillOpacity: 0.2 }; // Red
+        case "critical":
+          return { color: "#9333ea", fillColor: "#9333ea", fillOpacity: 0.2 }; // Purple
+      }
+    }
+
+    // Fallback to type-based colors for backward compatibility
+    switch (geoFence.type) {
+      case "safe_zone":
+      case "tourist_zone":
+        return { color: "#22c55e", fillColor: "#22c55e", fillOpacity: 0.2 }; // Green
+      case "alert_zone":
+        return { color: "#fbbf24", fillColor: "#fbbf24", fillOpacity: 0.2 }; // Yellow/Orange
+      case "restricted_zone":
+      case "restricted_area":
+      case "danger_zone":
+        return { color: "#ef4444", fillColor: "#ef4444", fillOpacity: 0.2 }; // Red
+      case "emergency_zone":
+        return { color: "#9333ea", fillColor: "#9333ea", fillOpacity: 0.2 }; // Purple
+      default:
+        return { color: "#9ca3af", fillColor: "#9ca3af", fillOpacity: 0.2 }; // Gray
+    }
+  };
+
   return (
     <div className="h-full w-full bg-card rounded-lg shadow-elegant overflow-hidden border">
       <div className="h-12 bg-gradient-hero flex items-center px-4 border-b">
         <h3 className="text-primary-foreground font-semibold">
-          Live Tourist Tracking
+          Live Tourist Tracking & Risk Zones
         </h3>
-        <div className="ml-auto flex items-center space-x-2">
-          <div className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-accent rounded-full"></div>
-            <span className="text-primary-foreground text-xs">Normal</span>
+        <div className="ml-auto flex items-center space-x-3">
+          {/* Tourist Status Legend */}
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-accent rounded-full"></div>
+              <span className="text-primary-foreground text-xs">Normal</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-warning rounded-full"></div>
+              <span className="text-primary-foreground text-xs">Alert</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-destructive rounded-full"></div>
+              <span className="text-primary-foreground text-xs">Danger</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-warning rounded-full"></div>
-            <span className="text-primary-foreground text-xs">Alert</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-destructive rounded-full"></div>
-            <span className="text-primary-foreground text-xs">Danger</span>
+
+          {/* Zone Risk Legend */}
+          <div className="border-l border-primary-foreground/30 pl-3 flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#22c55e" }}></div>
+              <span className="text-primary-foreground text-xs">Low</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#fbbf24" }}></div>
+              <span className="text-primary-foreground text-xs">Medium</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#ef4444" }}></div>
+              <span className="text-primary-foreground text-xs">High</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#9333ea" }}></div>
+              <span className="text-primary-foreground text-xs">Critical</span>
+            </div>
           </div>
         </div>
       </div>
@@ -156,6 +233,99 @@ export default function DashboardMap() {
           className="z-0"
         >
           <TileLayer attribution={tileLayerAttribution} url={tileLayerUrl} />
+
+          {/* Render geo-fences */}
+          {geoFences.map((geoFence) => {
+            const colors = getGeoFenceColor(geoFence);
+
+            if (geoFence.geometry.type === "Circle") {
+              // coordinates for circle is [longitude, latitude]
+              const coords = geoFence.geometry.coordinates as number[];
+              const longitude = coords[0];
+              const latitude = coords[1];
+              const center: [number, number] = [latitude, longitude];
+
+              return (
+                <Circle
+                  key={geoFence._id}
+                  center={center}
+                  radius={geoFence.geometry.radius || 1000}
+                  pathOptions={colors}
+                  weight={2}
+                >
+                  <Popup>
+                    <div className="p-2 space-y-2 min-w-[180px]">
+                      <div className="border-b border-border pb-2">
+                        <p className="font-semibold text-foreground">
+                          {geoFence.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {geoFence.type.replace('_', ' ').toUpperCase()}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        {geoFence.riskLevel && (
+                          <p className="text-sm">
+                            <span className="font-medium">Risk Level:</span>
+                            <span className="ml-2 px-2 py-1 rounded-full text-xs font-medium"
+                                  style={{ backgroundColor: colors.fillColor + '40', color: colors.color }}>
+                              {geoFence.riskLevel.toUpperCase()}
+                            </span>
+                          </p>
+                        )}
+                        <p className="text-sm">
+                          <span className="font-medium">Radius:</span> {geoFence.geometry.radius}m
+                        </p>
+                      </div>
+                    </div>
+                  </Popup>
+                </Circle>
+              );
+            } else if (geoFence.geometry.type === "Polygon") {
+              const coords = geoFence.geometry.coordinates as number[][];
+              const positions: [number, number][] = coords.map((coord) => [coord[1], coord[0]]);
+
+              return (
+                <Polygon
+                  key={geoFence._id}
+                  positions={positions}
+                  pathOptions={colors}
+                  weight={2}
+                >
+                  <Popup>
+                    <div className="p-2 space-y-2 min-w-[180px]">
+                      <div className="border-b border-border pb-2">
+                        <p className="font-semibold text-foreground">
+                          {geoFence.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {geoFence.type.replace('_', ' ').toUpperCase()}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        {geoFence.riskLevel && (
+                          <p className="text-sm">
+                            <span className="font-medium">Risk Level:</span>
+                            <span className="ml-2 px-2 py-1 rounded-full text-xs font-medium"
+                                  style={{ backgroundColor: colors.fillColor + '40', color: colors.color }}>
+                              {geoFence.riskLevel.toUpperCase()}
+                            </span>
+                          </p>
+                        )}
+                        <p className="text-sm">
+                          <span className="font-medium">Area:</span> Polygon Zone
+                        </p>
+                      </div>
+                    </div>
+                  </Popup>
+                </Polygon>
+              );
+            }
+
+            return null;
+          })}
+
+          {/* Render tourists */}
           {tourists.map(
             (tourist) =>
               tourist.lastLocation && (

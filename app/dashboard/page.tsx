@@ -97,8 +97,8 @@ export default function Dashboard() {
           ]);
         }
 
-        // Fetch alerts
-        const alertsResponse = await fetch('http://localhost:4000/api/dashboard/alerts?limit=10', {
+        // Fetch alerts - only latest 5 for dashboard
+        const alertsResponse = await fetch('http://localhost:4000/api/dashboard/alerts?limit=5', {
           credentials: 'include'
         });
         if (alertsResponse.ok) {
@@ -119,6 +119,54 @@ export default function Dashboard() {
           }));
           setRecentAlerts(transformedAlerts);
         }
+
+        // Fetch total active alerts count
+        const totalAlertsResponse = await fetch('http://localhost:4000/api/dashboard/alerts?status=active', {
+          credentials: 'include'
+        });
+        let totalActiveAlerts = 0;
+        if (totalAlertsResponse.ok) {
+          const totalAlertsData = await totalAlertsResponse.json();
+          const allAlerts = totalAlertsData.success ? totalAlertsData.data.alerts : [];
+          totalActiveAlerts = allAlerts.length;
+        }
+
+        // Fetch high-risk zones count
+        const zonesResponse = await fetch('http://localhost:4000/api/geofences', {
+          credentials: 'include'
+        });
+        let totalHighRiskZones = 0;
+        if (zonesResponse.ok) {
+          const zonesData = await zonesResponse.json();
+          const zones = zonesData.success ? zonesData.data.geoFences : [];
+          totalHighRiskZones = zones.length;
+        }
+
+        // Update stats with actual counts
+        setStats([
+          {
+            name: "Active Alerts",
+            stat: totalActiveAlerts.toString(),
+            icon: AlertTriangle,
+            change: totalActiveAlerts > 0 ? `${totalActiveAlerts} active` : "No active alerts",
+            changeType: totalActiveAlerts > 0 ? "negative" : "positive",
+          },
+          {
+            name: "High-Risk Zones",
+            stat: totalHighRiskZones.toString(),
+            icon: Shield,
+            change: `${totalHighRiskZones} zones monitored`,
+            changeType: "neutral",
+          },
+          {
+            name: "Response Time",
+            stat: "2.3 min",
+            icon: Clock,
+            change: "+0.2 min from last week",
+            changeType: "negative",
+          },
+        ]);
+
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
       }

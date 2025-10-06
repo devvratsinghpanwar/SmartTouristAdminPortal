@@ -1,6 +1,5 @@
 {
-  "/page": "app/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/high-risk-zones/page": "app/high-risk-zones/page.js",
-  "/alerts/page": "app/alerts/page.js"
+  "/high-risk-zones/page": "app/high-risk-zones/page.js"
 }

@@ -128,6 +128,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../app/send-notification/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/send-notification">> = Specific
+  const handler = {} as typeof import("../../app/send-notification/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../app/api/register/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/register">> = Specific
